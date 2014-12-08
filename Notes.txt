@@ -1,0 +1,23 @@
+
+Adrienne's Task ---------------
+
+We have a file that is boogered. It does not parse at line 26
+because.... of THIS issue: "---!ruby/object/<somebullshitclassobject>"
+
+This is bc !ruby blah blah blah is a script call signifying the beginning
+of a file, so EVERY block of data between ---!ruby/object/<someshit>
+and ---!ruby/object/someMOARshit> is a SET OF ALL ELEMENTS of the set
+(read: class) whatever.
+
+The parser stopped at line 26 bc that is where the NEXT set (read:
+file for another class object) begins.
+
+What we need to do is this: FOR EACH SET (read: class Object in the
+YAML file that begins at every "---!ruby/object/<classObject>") we need
+to algorithmically code a function or a method that will grab a set
+(!ruby/object/<firstbunchofcrap>) and iterate through each element of
+that set (read: attributes, instances of the set) and write them to
+another yaml file (whcih won't be boogered) and from there, convert the
+three separate new yaml files into three xml files.
+
+
