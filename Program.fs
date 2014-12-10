@@ -7,9 +7,8 @@ module Adrienne.Main
 
 open System
 open System.IO
-open YamlDotNet
-
-type YamlDocument = string[]
+open System.Text
+open YamlDotNet.RepresentationModel
 
 type YamlObject = 
     | Asset
@@ -37,12 +36,13 @@ let classObject (line:string):YamlObject option =
         | false -> None
         | true -> Some (yamlObjectYpe(line))
 
+
 let documents (stream:StreamReader) fn =
     let mutable (currentYamlObj:YamlObject option) = None
-    let mutable document:string[] = [||]
+    let mutable document:string = ""
     
     while not stream.EndOfStream do
-        let line = stream.ReadLine().Trim()
+        let line = stream.ReadLine()
 
         match (classObject line) with 
             | Some nextYamlObject -> 
@@ -50,21 +50,45 @@ let documents (stream:StreamReader) fn =
                     | Some y -> fn y document
                     | None -> ()
                 currentYamlObj <- Some nextYamlObject
-                document <- [|line|]
+                document <- line + "\n"
             | None -> 
                 document <- 
-                    Collections.Array.append document [|line|]
+                    document + line + "\n"
     done
 
     match currentYamlObj with
         | Some y -> fn y document
         | None -> ()
 
+let rec toXml (root:YamlNode) =
+    match root with
+        | :? YamlMappingNode as mapping ->
+                    printfn "Mapping Node"
+
+                    for entry in mapping.Children do
+                        toXml entry.Key
+                        toXml entry.Value
+                    done
+
+        | :? YamlScalarNode as scalar ->
+                    printfn "scalar: Value: %s" scalar.Value
+        | :? YamlSequenceNode as seq ->
+                    printfn "Sequence Node"
+                    ignore (Seq.iter toXml seq.Children)
+        | _ -> printfn "Unrecognized node: %s" (root.ToString())
+
+let parseDocument (document:string) =
+    let yaml = new YamlStream()
+    let r = new StringReader(document)
+
+    yaml.Load(r)
+
+    toXml(yaml.Documents.[0].RootNode)
+
 [<EntryPoint>]
 let main args = 
     let backupyml = new StreamReader(args.[0])
 
-    documents backupyml (fun d l -> 
-                            printfn "%s: %d lines" (printYamlObject d) (l.Length))
+    documents backupyml (fun d l ->
+                             parseDocument l)
     0
-
