@@ -60,20 +60,27 @@ let documents (stream:StreamReader) (fn:YamlObject -> string -> unit) =
         | Some y -> fn y document
         | None -> ()
 
-let rec toXml (root:YamlNode) (indent:int) =
+let printIndent (indent:int) =
     printf "%s" (String(' ', 4*indent))
+
+let rec toXml (root:YamlNode) (indent:int) =
+    printIndent indent
 
     match root with
         | :? YamlMappingNode as mapping ->
-                    printfn "Mapping Node: "
+                    printfn "Mapping Node: ["
 
                     for entry in mapping.Children do
-                        toXml entry.Key (indent + 1)
+                        printIndent (indent + 1)
+                        printfn "%s: " ((entry.Key :?> YamlScalarNode).Value)
                         toXml entry.Value (indent + 1)
                     done
 
+                    printIndent indent 
+                    printfn "]"
+
         | :? YamlScalarNode as scalar ->
-                    printf "scalar: %s" scalar.Value
+                    printf "%s" scalar.Value
         | :? YamlSequenceNode as seq ->
                     printf "Sequence Node: "
                     ignore (Seq.iter (fun n -> toXml n (indent + 1)) (seq.Children))
