@@ -1,0 +1,20 @@
+﻿attachable: 
+attributes: 
+  position: 
+  size: "118917"
+  site_id: "2"
+  assoc: cover_image
+  thumbnail: 
+  attachable_type: 
+  caption: 
+  attachable_id: 
+  name: Anticancer_new-ed_cvr_LR
+  height: "1100"
+  updated_on: 2012-02-25 09:00:13
+  content_type: image/jpeg
+  created_on: 2012-02-20 08:51:23
+  width: "720"
+  filename: Anticancer_new-ed_cvr_LR.jpg
+  guid: e1c34857
+  id: "1473"
+site:

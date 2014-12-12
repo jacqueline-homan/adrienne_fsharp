@@ -78,7 +78,9 @@ let rec toXml (root:YamlNode) =
         | _ -> printfn "Unrecognized node: %s" (root.ToString())
 
 let parseDocument (document:string) =
+// let yaml = new YamlStream is same as "let x = f(y) for y = 5 and f(y) = y"
     let yaml = new YamlStream()
+// let r = new StringReader(document) is same as "let r = f(z) for f(z) = werds"
     let r = new StringReader(document)
 
     yaml.Load(r)

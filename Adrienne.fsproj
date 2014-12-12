@@ -18,8 +18,8 @@
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>x86</PlatformTarget>
-    <Externalconsole>true</Externalconsole>
     <Commandlineparameters>../../backup.yml</Commandlineparameters>
+    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,7 +37,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="YamlDotNet">
-      <HintPath>packages\YamlDotNet.3.4.0\lib\net35\YamlDotNet.dll</HintPath>
+      <HintPath>..\packages\YamlDotNet.3.4.0\lib\net35\YamlDotNet.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -49,5 +49,7 @@
     <None Include="Notes.txt" />
     <None Include="backup.yml" />
     <None Include="packages.config" />
+    <None Include="SampleAsset.xml" />
+    <None Include="SampleAsset.txt" />
   </ItemGroup>
 </Project>
