@@ -1,2 +1,26 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-
+<assets>
+	<asset>
+		<attachable />
+		<attributes>
+			<position />
+			<size>118917</size>
+			<site_id>2</site_id>
+			<assoc>cover_image</assoc>
+			<thumbnail />
+		  	<attachable_type /> 
+  			<caption /> 
+  			<attachable_id /> 
+		  	<name>Anticancer_new-ed_cvr_LR</name>
+	  		<height>"1100"</height>
+	  		<updated_on>2012-02-25 09:00:13</updated_on>
+  			<content_type>image/jpeg</content_type>
+  			<created_on>2012-02-20 08:51:23</created_on>
+  			<width>720</width>
+  			<filename>Anticancer_new-ed_cvr_LR.jpg</filename>	
+  			<guid>e1c34857</guid>
+  			<id>1473</id>
+		</attributes>
+		<site />
+	</asset>
+</assets>
