@@ -89,7 +89,7 @@ let rec toXml (root:YamlNode) (indent:int) =
 
 let parseDocument (yamlObject:YamlObject) (document:string) =
     match yamlObject with
-        | Asset -> 
+        | Asset | EvtEvent | NwsPost -> 
             printfn "%s" (printYamlObject yamlObject)
             let yaml = new YamlStream()
             let r = new StringReader(document)
