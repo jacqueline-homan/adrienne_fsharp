@@ -60,25 +60,25 @@ let documents (stream:StreamReader) (fn:YamlObject -> string -> unit) =
         | Some y -> fn y document
         | None -> ()
 
-let rec toXml (root:YamlNode) =
+let rec toXml (root:YamlNode) (indent:int) =
+    printf "%s" (String(' ', 4*indent))
+
     match root with
         | :? YamlMappingNode as mapping ->
-                    printfn "Mapping Node"
+                    printfn "Mapping Node: "
 
                     for entry in mapping.Children do
-                        printf "Key: "
-                        toXml entry.Key
-
-                        printf "Value: "
-                        toXml entry.Value
+                        toXml entry.Key (indent + 1)
+                        toXml entry.Value (indent + 1)
                     done
 
         | :? YamlScalarNode as scalar ->
-                    printfn "scalar: Value: %s" scalar.Value
+                    printf "scalar: %s" scalar.Value
         | :? YamlSequenceNode as seq ->
-                    printfn "Sequence Node"
-                    ignore (Seq.iter toXml seq.Children)
-        | _ -> printfn "Unrecognized node: %s" (root.ToString())
+                    printf "Sequence Node: "
+                    ignore (Seq.iter (fun n -> toXml n (indent + 1)) (seq.Children))
+        | _ -> printf "Unrecognized node: %s" (root.ToString())
+    printfn ""
 
 let parseDocument (yamlObject:YamlObject) (document:string) =
     match yamlObject with
@@ -89,7 +89,7 @@ let parseDocument (yamlObject:YamlObject) (document:string) =
 
             yaml.Load(r)
 
-            toXml(yaml.Documents.[0].RootNode)
+            toXml(yaml.Documents.[0].RootNode) 0
         | _ -> ()
 
 [<EntryPoint>]
