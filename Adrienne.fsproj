@@ -39,6 +39,7 @@
     <Reference Include="YamlDotNet">
       <HintPath>..\packages\YamlDotNet.3.4.0\lib\net35\YamlDotNet.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />

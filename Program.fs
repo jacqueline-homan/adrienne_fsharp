@@ -9,6 +9,7 @@ open System
 open System.IO
 open System.Text
 open YamlDotNet.RepresentationModel
+open System.Xml
 
 type YamlObject = 
     | Asset
@@ -60,43 +61,42 @@ let documents (stream:StreamReader) (fn:YamlObject -> string -> unit) =
         | Some y -> fn y document
         | None -> ()
 
-let printIndent (indent:int) =
-    printf "%s" (String(' ', 4*indent))
+let mappingKey (entry:Collections.Generic.KeyValuePair<YamlNode,YamlNode>) : string =
+    (entry.Key :?> YamlScalarNode).Value
 
-let rec toXml (root:YamlNode) (indent:int) =
-    printIndent indent
-
+let rec toXml (root:YamlNode) (xmlRoot:XmlNode) (xmlDocument:XmlDocument) =
     match root with
         | :? YamlMappingNode as mapping ->
-                    printfn "Mapping Node: ["
-
                     for entry in mapping.Children do
-                        printIndent (indent + 1)
-                        printfn "%s: " ((entry.Key :?> YamlScalarNode).Value)
-                        toXml entry.Value (indent + 1)
+                        let e = xmlDocument.CreateElement(mappingKey entry)
+                        let r = xmlRoot.AppendChild(e)
+                        toXml entry.Value r xmlDocument
                     done
-
-                    printIndent indent 
-                    printfn "]"
-
+                
         | :? YamlScalarNode as scalar ->
-                    printf "%s" scalar.Value
+                    let v = scalar.Value
+                    xmlRoot.InnerText <- v
         | :? YamlSequenceNode as seq ->
-                    printf "Sequence Node: "
-                    ignore (Seq.iter (fun n -> toXml n (indent + 1)) (seq.Children))
+                    ignore (Seq.iter (fun n -> toXml n xmlRoot xmlDocument) (seq.Children))
         | _ -> printf "Unrecognized node: %s" (root.ToString())
     printfn ""
+
+let createWriter() : XmlWriter =
+    let settings = new XmlWriterSettings()
+    settings.Indent <- true
+    XmlWriter.Create(Console.OpenStandardOutput(), settings)
 
 let parseDocument (yamlObject:YamlObject) (document:string) =
     match yamlObject with
         | Asset | EvtEvent | NwsPost -> 
-            printfn "%s" (printYamlObject yamlObject)
+            let xmlDocument = new XmlDocument()
+            let root = xmlDocument.AppendChild(xmlDocument.CreateElement(printYamlObject yamlObject))
             let yaml = new YamlStream()
             let r = new StringReader(document)
-
             yaml.Load(r)
-
-            toXml(yaml.Documents.[0].RootNode) 0
+            toXml (yaml.Documents.[0].RootNode) root xmlDocument
+            use writer = createWriter()
+            xmlDocument.WriteTo(writer)
         | _ -> ()
 
 [<EntryPoint>]
