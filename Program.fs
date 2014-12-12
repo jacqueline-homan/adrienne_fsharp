@@ -88,7 +88,7 @@ let rec toXml (root:YamlNode) (xmlRoot:XmlNode) (xmlDocument:XmlDocument) =
 let createWriter (filename:string) : XmlWriter =
     let settings = new XmlWriterSettings()
     settings.Indent <- true
-    XmlWriter.Create(filename + ".xml", settings)
+    XmlWriter.Create("../../" + filename + ".xml", settings)
 
 let parseDocument (yamlObject:YamlObject) (document:string) (outDocs:OutputDocs) =
     match yamlObject with
