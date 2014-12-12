@@ -17,6 +17,8 @@ type YamlObject =
     | EvtEvent
     | Outlander
 
+type OutputDocs = Collections.Generic.Dictionary<string,XmlDocument>
+
 let printYamlObject(y:YamlObject):string = 
     match y with 
         | Asset -> "Asset"
@@ -37,8 +39,10 @@ let classObject (line:string):YamlObject option =
         | false -> None
         | true -> Some (yamlObjectYpe(line))
 
-
-let documents (stream:StreamReader) (fn:YamlObject -> string -> unit) =
+     
+let documents (stream:StreamReader) 
+              (outDocs:OutputDocs) 
+              (fn:YamlObject -> string -> OutputDocs -> unit) =
     let mutable (currentYamlObj:YamlObject option) = None
     let mutable document:string = ""
     
@@ -48,7 +52,7 @@ let documents (stream:StreamReader) (fn:YamlObject -> string -> unit) =
         match (classObject line) with 
             | Some nextYamlObject -> 
                 match currentYamlObj with 
-                    | Some y -> fn y document
+                    | Some y -> fn y document outDocs
                     | None -> ()
                 currentYamlObj <- Some nextYamlObject
                 document <- line + "\n"
@@ -58,7 +62,7 @@ let documents (stream:StreamReader) (fn:YamlObject -> string -> unit) =
     done
 
     match currentYamlObj with
-        | Some y -> fn y document
+        | Some y -> fn y document outDocs
         | None -> ()
 
 let mappingKey (entry:Collections.Generic.KeyValuePair<YamlNode,YamlNode>) : string =
@@ -81,27 +85,43 @@ let rec toXml (root:YamlNode) (xmlRoot:XmlNode) (xmlDocument:XmlDocument) =
         | _ -> printf "Unrecognized node: %s" (root.ToString())
     printfn ""
 
-let createWriter() : XmlWriter =
+let createWriter (filename:string) : XmlWriter =
     let settings = new XmlWriterSettings()
     settings.Indent <- true
-    XmlWriter.Create(Console.OpenStandardOutput(), settings)
+    XmlWriter.Create(filename + ".xml", settings)
 
-let parseDocument (yamlObject:YamlObject) (document:string) =
+let parseDocument (yamlObject:YamlObject) (document:string) (outDocs:OutputDocs) =
     match yamlObject with
         | Asset | EvtEvent | NwsPost -> 
-            let xmlDocument = new XmlDocument()
-            let root = xmlDocument.AppendChild(xmlDocument.CreateElement(printYamlObject yamlObject))
+            let xmlDocument = outDocs.[printYamlObject yamlObject]
+            let root = xmlDocument.FirstChild.AppendChild(xmlDocument.CreateElement(printYamlObject yamlObject))
             let yaml = new YamlStream()
             let r = new StringReader(document)
             yaml.Load(r)
             toXml (yaml.Documents.[0].RootNode) root xmlDocument
-            use writer = createWriter()
-            xmlDocument.WriteTo(writer)
         | _ -> ()
 
 [<EntryPoint>]
 let main args = 
     let backupyml = new StreamReader(args.[0])
 
-    documents backupyml parseDocument
+    let outDocs = new OutputDocs()
+
+    Seq.iter(
+        fun t ->
+                let d = new XmlDocument()
+                ignore (d.AppendChild(d.CreateElement(t + "s")))
+                outDocs.Add(t, d)
+        ) (["Asset"; "NwsPost"; "EvtEvent";])
+    
+    documents backupyml outDocs parseDocument
+
+    Seq.iter(
+        fun t ->
+                printfn "Writing %s.xml" t
+                let out = outDocs.[t]
+                use w = createWriter t
+                out.WriteTo(w)
+            )
+        (["Asset"; "NwsPost"; "EvtEvent";])
     0
