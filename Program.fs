@@ -37,7 +37,7 @@ let classObject (line:string):YamlObject option =
         | true -> Some (yamlObjectYpe(line))
 
 
-let documents (stream:StreamReader) fn =
+let documents (stream:StreamReader) (fn:YamlObject -> string -> unit) =
     let mutable (currentYamlObj:YamlObject option) = None
     let mutable document:string = ""
     
@@ -66,7 +66,10 @@ let rec toXml (root:YamlNode) =
                     printfn "Mapping Node"
 
                     for entry in mapping.Children do
+                        printf "Key: "
                         toXml entry.Key
+
+                        printf "Value: "
                         toXml entry.Value
                     done
 
@@ -77,20 +80,21 @@ let rec toXml (root:YamlNode) =
                     ignore (Seq.iter toXml seq.Children)
         | _ -> printfn "Unrecognized node: %s" (root.ToString())
 
-let parseDocument (document:string) =
-// let yaml = new YamlStream is same as "let x = f(y) for y = 5 and f(y) = y"
-    let yaml = new YamlStream()
-// let r = new StringReader(document) is same as "let r = f(z) for f(z) = werds"
-    let r = new StringReader(document)
+let parseDocument (yamlObject:YamlObject) (document:string) =
+    match yamlObject with
+        | Asset -> 
+            printfn "%s" (printYamlObject yamlObject)
+            let yaml = new YamlStream()
+            let r = new StringReader(document)
 
-    yaml.Load(r)
+            yaml.Load(r)
 
-    toXml(yaml.Documents.[0].RootNode)
+            toXml(yaml.Documents.[0].RootNode)
+        | _ -> ()
 
 [<EntryPoint>]
 let main args = 
     let backupyml = new StreamReader(args.[0])
 
-    documents backupyml (fun d l ->
-                             parseDocument l)
+    documents backupyml parseDocument
     0
